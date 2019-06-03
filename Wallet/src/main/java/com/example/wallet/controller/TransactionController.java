@@ -19,9 +19,11 @@ import com.example.wallet.service.TransactionService;
 import com.example.wallet.service.UserAccountService;
 
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("v1/transferTo")
+@Slf4j
 public class TransactionController {
 
 	@Autowired
@@ -33,6 +35,7 @@ public class TransactionController {
 	@ApiOperation(value = "Add Money in Wallet ", response = TransactionDTO.class, tags = "transact")
 	@PostMapping("/{id}")
 	public ResponseEntity addMoney(@PathVariable("id") Long userAccountId, @RequestBody TransactionDTO walletDTO) {
+		log.info("[addMoney] for the userAccountId {}",userAccountId);
 		Transaction saved;
 		try {
 			walletDTO.setUserAccountId(userAccountId);
