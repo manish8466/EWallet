@@ -8,7 +8,7 @@ import com.example.wallet.dto.UserAccountDTO;
 import com.example.wallet.entity.User;
 
 /**
- * @author Manish Doodi
+ * @author Manish.Doodi
  *
  */
 

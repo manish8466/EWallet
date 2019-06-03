@@ -11,9 +11,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger.web.UiConfiguration;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-/*Read from https://dzone.com/articles/spring-boot-restful-api-documentation-with-swagger*/
-
-
 @Configuration
 @EnableSwagger2
 public class ApplicationConfig {
@@ -22,7 +19,6 @@ public class ApplicationConfig {
         return new Docket(DocumentationType.SWAGGER_2)
         		.apiInfo(apiInfo())
                 .select().apis(RequestHandlerSelectors.basePackage(getClass().getPackage().getName()))
-                //.paths(regex("/product.*"))
                 .build();
     }
     
@@ -33,8 +29,8 @@ public class ApplicationConfig {
     
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Simple EWallet API")
-                .description("API to make account and create transactions")
+                .title("EWallet API")
+                .description("API to make users and perform transaction through wallet")
                 .version("1.0")
                 .build();
     }

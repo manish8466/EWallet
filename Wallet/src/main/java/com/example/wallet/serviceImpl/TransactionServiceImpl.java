@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,12 +15,11 @@ import com.example.wallet.dto.TransactionDTO;
 import com.example.wallet.entity.Transaction;
 import com.example.wallet.entity.User;
 import com.example.wallet.exceptions.BalanceLowException;
-import com.example.wallet.exceptions.UserNotFoundException;
+import com.example.wallet.exceptions.InvalidUserException;
 import com.example.wallet.repository.AccountRepository;
 import com.example.wallet.repository.TransactionRepository;
 import com.example.wallet.service.TransactionService;
 import com.example.wallet.service.UserAccountService;
-import com.google.common.collect.Lists;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,110 +34,74 @@ public class TransactionServiceImpl implements TransactionService {
 	@Autowired
 	AccountRepository accountRepository;
 	
-
-	/**
-	 * retrieve transactions by their transaction reference this operations is used
-	 * to validate if a transaction ref has been used previously
-	 */
-	@Override
-	public Transaction transactionByRef(Long txnRef) throws UserNotFoundException {
-		return transactionRepository.getTransactionByRef(txnRef).orElseThrow(
-				() -> new UserNotFoundException(HttpStatus.BAD_GATEWAY.value(),String.format("transaction with ref '%d' doesnt exist", txnRef)));
-	}
-
-	/**
-	 * this operations registers a transaction on behalf of user debit/credits, it
-	 * also validates if a user has insufficient funds if a debit is to be made
-	 */
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public Transaction createTransaction(Transaction transaction) throws BalanceLowException {
-		System.out.println("hello==>"+transaction.getAmount());
+	public Transaction creditWallet(Transaction transaction)  {
+		log.info("[creditWallet] for userAccountId {}",transaction.getUserAccount().getId());
 		User user=accountService.getUserById(transaction.getUserAccount().getId());
+		if(user == null) {
+			throw new InvalidUserException("user is not present in system with this userAccountId");
+		}
 		double balance = user.getAccount().getAmount();
+		if(transaction.getAmount() <=0) {
+			throw new BalanceLowException("Cannot add amount to wallet,amount is less than or equal to 0");
+		}
         balance= balance+transaction.getAmount();
         user.getAccount().setAmount(balance);
-        try {
 			accountService.save(user);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
         if (balance>= 0) {
 			transaction.setAccount(user.getAccount());
 			transaction.setUserAccount(user);
 			return transactionRepository.save(transaction);
 		}
-
-		throw new BalanceLowException(String.format("user's balance is %.2f and cannot perform a transaction of %.2f ",
-				balance, transaction.getAmount()));
-
-	}
-
-	@Override
-	public Transaction update(Transaction transaction, Long id) throws Exception {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
-	public List<Transaction> getList() {
-		return Lists.newArrayList(transactionRepository.findAll());
-	}
-
-	@Override
-	public List<Transaction> transactionsByUserAccountID(Long accountId) {
-		return transactionRepository.getTransactionsForUser(accountId);
-	}
-
-	@Override
-	public double balanceByUserAccountID(Long accountId) {
-		return transactionRepository.getBalance(accountId);
-	}
-
-	@Override
-	public List<Transaction> transactions() {
-		return Lists.newArrayList(transactionRepository.findAll());
-	}
-
-	@Override
-	public Transaction save(Transaction transaction) throws Exception {
-		throw new UnsupportedOperationException("Not supported yet.");
+      return null;
 	}
 
 	@Transactional(rollbackFor = RuntimeException.class)
-	public HashMap<String,String> transfer(TransactionDTO walletDTO, Long toUserAccountId, Long fromUserAccountId) {
-		User to=accountService.getUserById(toUserAccountId);
-		User from=accountService.getUserById(fromUserAccountId);
-		double fromBalance=from.getAccount().getAmount()-walletDTO.getAmount();
-		from.getAccount().setAmount(fromBalance);
-
-		double toBalance=to.getAccount().getAmount()+walletDTO.getAmount();
-		to.getAccount().setAmount(toBalance);
+	public HashMap<String,String> moneytransfer(TransactionDTO walletDTO, Long toUserAccountId, Long fromUserAccountId) {
+		log.info("[moneytransfer] fromUserAccountId {} and toUserAccountId {}", fromUserAccountId, toUserAccountId);
+		User toUser=accountService.getUserById(toUserAccountId);
+		User fromUser=accountService.getUserById(fromUserAccountId);
+		if(toUser == null || fromUser == null) {
+			throw new InvalidUserException("toUserAccountId or fromUserAccoun is invalid");
+		}
+		double fromBalance=fromUser.getAccount().getAmount()-walletDTO.getAmount();
+		fromUser.getAccount().setAmount(fromBalance);
+		if (fromBalance < 0) {
+			throw new BalanceLowException("Insufficient balance in the sender wallet");
+		}
+		double toBalance=toUser.getAccount().getAmount()+walletDTO.getAmount();
+		toUser.getAccount().setAmount(toBalance);
 		Transaction transaction = new Transaction();
-		transaction.setUserAccount(from);
-		transaction.setAccount(from.getAccount());
+		transaction.setUserAccount(fromUser);
+		transaction.setAccount(fromUser.getAccount());
 		transaction.setAmount(walletDTO.getAmount());
 		transaction.setTransactionDate(new Date());
 		transaction.setTransactionType(1);
 		transaction.setTransactionReference(UUID.randomUUID().toString());
 		try {
-			accountService.save(from);
-			accountService.save(to);
+			accountService.save(fromUser);
+			accountService.save(toUser);
 			 Transaction tarTransaction1=transactionRepository.save(transaction);
 			HashMap<String,String> map= new HashMap<>();
 			 map.put("referanceId",tarTransaction1.getTransactionReference());
 			 map.put("message","transaction process successfully");
 			return  map;
-		}catch (Exception e){
-			log.error("error in transaction");
+		} catch (Exception e) {
+			log.error("[moneytransfer] exception occured with message {}", e.getMessage());
 		}
 
 		return  null;
 	}
 
 	@Override
-	public List<HashMap<String, String>> history(Long id) throws UserNotFoundException, BalanceLowException {
-		List<Transaction> list=transactionRepository.getTransactionsForUser(id);
+	public List<HashMap<String, String>> userHistory(Long id)  {
+		log.info("[userHistory] of accountId {}",id);
+		User user = accountService.getUserById(id);
+		if(user == null) {
+			throw new InvalidUserException("User is not present with this accountId");
+		}
+		List<Transaction> list = transactionRepository.findByUserAccountId(id);
 		List<HashMap<String,String>> response= new ArrayList<>();
 		for (Transaction transaction : list) {
 			  HashMap<String,String> map= new HashMap<>();

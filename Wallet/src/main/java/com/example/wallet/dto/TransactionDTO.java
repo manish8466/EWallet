@@ -2,22 +2,16 @@ package com.example.wallet.dto;
 
 import java.time.LocalDateTime;
 
-import io.swagger.annotations.ApiModelProperty;
-
 /**
- * @author Manish Doodi
+ * @author manish.doodi
  *
  */
 
 /** Client Facing Model of Transaction **/
 public class TransactionDTO {
 
-	@ApiModelProperty(required = false, hidden = true)
 	private Long id;
-
-	@ApiModelProperty(required = false, hidden = true)
 	private Long userAccountId;
-
 	private double amount;
 	private String details;
 	private LocalDateTime transactionDate;

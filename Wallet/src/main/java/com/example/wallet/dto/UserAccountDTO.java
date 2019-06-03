@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * @author Manish Doodi
+ * @author manish.doodi
  *
  */
 

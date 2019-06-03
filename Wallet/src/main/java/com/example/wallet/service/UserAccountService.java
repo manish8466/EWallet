@@ -4,54 +4,23 @@ import java.util.List;
 
 import com.example.wallet.dto.UserAccountDTO;
 import com.example.wallet.entity.User;
-import com.example.wallet.exceptions.UserNotFoundException;
 
 /**
- * @author Deepak Garg
+ * @author manish.doodi
  *
  */
 
 /** Service for Users */
 public interface UserAccountService {
 
-	/**
-	 * Save a user account
-	 * 
-	 * @param t
-	 * @return
-	 * @throws Exception
-	 */
-	User save(User t) throws Exception;
+	User save(User t);
 
-	/**
-	 * Update a user account
-	 * 
-	 * @param user account
-	 * @param user id
-	 * @return
-	 * @throws Exception
-	 */
-	User update(User t, Long id) throws Exception;
-
-	/**
-	 * @return list of users
-	 */
-	List<User> getList();
-
-	/**
-	 * @param accountId
-	 * @return user account by account id
-	 * @throws Exception
-	 */
-	User userAccountByPK(Long accountId) throws UserNotFoundException;
-	
-
-	User createUser(UserAccountDTO userAccountDTO) throws UserNotFoundException;
+	User createUser(UserAccountDTO userAccountDTO) ;
 	
 	User getUserById(Long id);
 	
 	List<User> getAllUser();
 	
-	User updateUser(User t, Long id) throws UserNotFoundException;
+	User updateUser(User t, Long id);
 
 }

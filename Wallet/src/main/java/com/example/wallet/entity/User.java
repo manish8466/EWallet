@@ -18,7 +18,6 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-
 @Entity
 public class User {
 
@@ -37,7 +36,7 @@ public class User {
 	@OneToMany(mappedBy = "userAccount", fetch = FetchType.EAGER)
 	private Set<Transaction> transactions = new HashSet<>();
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name="account_id")
+	@JoinColumn(name = "account_id")
 	private Account account;
 
 	public User() {
@@ -117,9 +116,6 @@ public class User {
 	public void setTransactions(Set<Transaction> transactions) {
 		this.transactions = transactions;
 	}
-	
-	
-	
 
 	public Account getAccount() {
 		return account;

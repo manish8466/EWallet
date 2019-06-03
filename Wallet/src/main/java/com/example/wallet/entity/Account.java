@@ -16,10 +16,10 @@ import lombok.Setter;
 @Table(name = "account")
 public class Account {
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	private double amount;
-	@OneToOne(mappedBy="account")
+	@OneToOne(mappedBy = "account")
 	private User user;
 
 }

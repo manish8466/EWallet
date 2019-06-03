@@ -1,39 +1,20 @@
 package com.example.wallet.exceptions;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
- * @author Manish Doodi
+ * @author Manish.Doodi
  *
  */
 
-/** Exception when balance insufficient */
-public class BalanceLowException extends Exception {
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class BalanceLowException extends RuntimeException {
 
-	private String message;
+	private static final long serialVersionUID = 7537167259815318140L;
 
-	public BalanceLowException() {
-		super();
-	}
-
-	/**
-	 * @param message
-	 */
 	public BalanceLowException(String message) {
-		super();
-		this.message = message;
-	}
-
-	/**
-	 * @return the message
-	 */
-	public String getMessage() {
-		return message;
-	}
-
-	/**
-	 * @param message the message to set
-	 */
-	public void setMessage(String message) {
-		this.message = message;
+		super(message);
 	}
 
 }

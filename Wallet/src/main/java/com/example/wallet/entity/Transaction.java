@@ -18,14 +18,14 @@ import javax.validation.constraints.NotNull;
 public class Transaction {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY,generator="native")
+	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "native")
 	private Long id;
-	@ManyToOne(cascade=CascadeType.ALL,fetch = FetchType.LAZY)
-	@JoinColumn(name="user_id")
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
 	private User userAccount;
-	
-	@ManyToOne(cascade=CascadeType.ALL,fetch = FetchType.LAZY)
-	@JoinColumn(name="account_id")
+
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "account_id")
 	private Account account;
 	@NotNull
 	private double amount;
@@ -37,10 +37,9 @@ public class Transaction {
 	private Date transactionDate;
 	@NotNull
 	private String transactionReference;
-	
-	@JoinColumn(name="transaction_type")
+
+	@JoinColumn(name = "transaction_type")
 	private int transactionType;
-	
 
 	public Transaction() {
 	}
@@ -105,15 +104,12 @@ public class Transaction {
 
 	public String getTransactionReference() {
 		return transactionReference;
-	} 
+	}
 
 	public void setTransactionReference(String transactionReference) {
 		this.transactionReference = transactionReference;
 	}
-	
-	
-	
-	
+
 	public Account getAccount() {
 		return account;
 	}
